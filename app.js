@@ -17,9 +17,8 @@ var connection = mysql.createConnection({
   database: "firm_DB",
 });
 
-//connect
-
 connection.connect();
+
 //The app function
 interactWithDB();
 connection.query = util.promisify(connection.query);
@@ -80,4 +79,21 @@ function add() {
           break;
       }
     });
+
+  function addDepartment() {
+    inquirer
+      .prompt({
+        name: "action",
+        type: "input",
+        message: "What the name of the department?",
+      })
+      .then(function (answer) {
+        let sql = "INSERT INTO department (name) VALUES (?)";
+        connection.query(sql, answer.action, function (err, result) {
+          if (err) throw err;
+          console.log("Department added! Next...");
+          interactWithDB();
+        });
+      });
+  }
 }
