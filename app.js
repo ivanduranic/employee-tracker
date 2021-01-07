@@ -424,3 +424,102 @@ function update() {
     );
   }
 }
+
+// Defining function toDelete
+function toDelete() {
+  inquirer
+    .prompt({
+      name: "action",
+      type: "rawlist",
+      message: "What would you like to delete?",
+      choices: ["Departments", "Roles", "Employees"],
+    })
+    .then(function (answer) {
+      switch (answer.action) {
+        case "Departments":
+          deleteMyDepartments();
+          break;
+
+        case "Roles":
+          deleteMyRoles();
+          break;
+
+        case "Employees":
+          deleteMyEmployees();
+          break;
+      }
+    });
+
+  async function deleteMyDepartments() {
+    let listOfDepartments = [];
+
+    listOfDepartments = await availableDepartments();
+
+    await inquirer
+      .prompt({
+        name: "action",
+        type: "list",
+        message: "Which department would you like to delete",
+        choices: listOfDepartments,
+      })
+      .then(function (answer) {
+        connection.query(
+          "DELETE FROM department WHERE id='?'",
+          answer.action,
+          function (err, result) {
+            if (err) throw err;
+            console.log("deleted!! next...");
+            interactWithDB();
+          }
+        );
+      });
+  }
+  async function deleteMyRoles() {
+    let myRoleChoices = [];
+
+    myRoleChoices = await availableRole();
+
+    await inquirer
+      .prompt({
+        name: "action",
+        type: "list",
+        message: "Which role would you like to delete",
+        choices: myRoleChoices,
+      })
+      .then(function (answer) {
+        connection.query(
+          "DELETE FROM role WHERE id='?'",
+          answer.action,
+          function (err, result) {
+            if (err) throw err;
+            console.log("deleted!! next...");
+            interactWithDB();
+          }
+        );
+      });
+  }
+  async function deleteMyEmployees() {
+    let Choices = [];
+
+    Choices = await availableEmployees;
+
+    await inquirer
+      .prompt({
+        name: "action",
+        type: "list",
+        message: "Which employee would you like to delete",
+        choices: Choices,
+      })
+      .then(function (answer) {
+        connection.query(
+          "DELETE FROM employee WHERE id='?'",
+          answer.action,
+          function (err, result) {
+            if (err) throw err;
+            console.log("deleted!! next...");
+            interactWithDB();
+          }
+        );
+      });
+  }
+}
