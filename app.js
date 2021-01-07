@@ -163,37 +163,35 @@ function add() {
       {
         name: "firstName",
         type: "input",
-        message: "What the employee's first name?",
+        message: "What is the employee's first name?",
       },
       {
         name: "lastName",
         type: "input",
-        message: "What the employee's last name?",
+        message: "What is the employee's last name?",
       },
       {
         name: "roleID",
         type: "list",
-        message: "Please select the role/position for this employee?",
+        message: "Please select the role for this particular employee?",
         choices: roleChoices,
       },
       {
         name: "manager",
         type: "confirm",
-        message: "Is this a manager or superviser position?",
+        message: "Is this a manager or superviser role?",
       },
       {
         name: "managerID",
         type: "list",
-        message: "Please select the manager/superviser of this employee?",
+        message: "Please select this employee's manager/supervisor?",
         choices: managerChoices,
       },
     ];
-    //const availableD = availableDepartments();
-    //const departChoices = availableD.map();
 
     //function to provide departments as choices and reference it ID to the role
 
-    //send data to the
+    //send data
     const answer = await inquirer.prompt(questions);
     const res = await connection.query(
       "INSERT INTO employee (first_name, last_name, role_id, isManager, superviserORmanager_id) VALUES (?,?,?,?,?)",
@@ -209,5 +207,132 @@ function add() {
       `${answer.firstName} ${answer.lastName} was added as an employee. Next...`
     );
     interactWithDB();
+  }
+}
+
+//Defining view function
+function view() {
+  inquirer
+    .prompt({
+      name: "action",
+      type: "rawlist",
+      message: "What would you like to view?",
+      choices: [
+        "Departments",
+        "Roles",
+        "Employees",
+        "Employees by manager",
+        "The total utilized budget of a department",
+      ],
+    })
+    .then(function (answer) {
+      switch (answer.action) {
+        case "Departments":
+          availableDepartment();
+          break;
+
+        case "Roles":
+          availableRoles();
+          break;
+
+        case "Employees":
+          availableEmployee();
+          break;
+
+        case "Employees by manager":
+          viewEmployeesByManager();
+          break;
+
+        case "The total utilized budget of a department":
+          viewTheTotalUtilizedBudget();
+          break;
+      }
+    });
+
+  function availableDepartment() {
+    let sql = "SELECT * FROM department";
+    connection.query(sql, function (err, result) {
+      if (err) throw err;
+      for (let i = 0; i < result.length; i++) {
+        console.log(result[i].name);
+        interactWithDB();
+      }
+    });
+  }
+  function availableRoles() {
+    let sql = "SELECT * FROM role";
+    connection.query(sql, function (err, result) {
+      if (err) throw err;
+      for (let i = 0; i < result.length; i++) {
+        console.log(result[i].title);
+        interactWithDB();
+      }
+    });
+  }
+  function availableEmployee() {
+    let sql = "SELECT * FROM employee";
+    connection.query(sql, function (err, result) {
+      if (err) throw err;
+      for (let i = 0; i < result.length; i++) {
+        console.log(`${result[i].first_name} ${result[i].last_name}`);
+        interactWithDB();
+      }
+    });
+  }
+
+  //function for viewing employees by their manager
+  async function viewEmployeesByManager() {
+    let managersChoices = [];
+
+    managersChoices = await availableManager();
+
+    await inquirer
+      .prompt({
+        name: "action",
+        type: "list",
+        message: "Which manager would you like to view's employee(s)",
+        choices: managersChoices,
+      })
+      .then(function (answer) {
+        connection.query(
+          "SELECT * FROM employee WHERE superviserORmanager_id='?'",
+          answer.action,
+          function (err, result) {
+            if (err) throw err;
+            for (let i = 0; i < result.length; i++) {
+              console.log(`${result[i].first_name} ${result[i].last_name}`);
+              interactWithDB();
+            }
+          }
+        );
+      });
+  }
+  //function for viewing a total utilized badget of a department
+  async function viewTheTotalUtilizedBudget() {
+    let departmentChoices = [];
+
+    departmentChoices = await availableDepartments();
+
+    await inquirer
+      .prompt({
+        name: "action",
+        type: "list",
+        message:
+          "Which department would you like to view the total utilized budget?",
+        choices: departmentChoices,
+      })
+      .then(function (answer) {
+        connection.query(
+          "SELECT SUM(role.salary) as total, department.name as name FROM ((role INNER JOIN employee ON role.id = employee.role_id) INNER JOIN department ON role.department_id = department.id) WHERE department.id = ? GROUP BY department.id",
+          answer.action,
+          function (err, result) {
+            if (err) throw err;
+            console.log(
+              `The total utilized budget for ${result[0].name} department is $${result[0].total}`
+            );
+            interactWithDB();
+          }
+        );
+      });
   }
 }
