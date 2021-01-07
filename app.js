@@ -149,4 +149,65 @@ function add() {
       );
     });
   }
+
+  //Define addEmployee function
+  async function addEmployee() {
+    const roleTitle = {};
+    const managerId = {};
+    // cosnt myDepartments = await avaialbeDepartements()
+    const roleChoices = await availableRole();
+
+    const managerChoices = await availableManager();
+
+    const questions = [
+      {
+        name: "firstName",
+        type: "input",
+        message: "What the employee's first name?",
+      },
+      {
+        name: "lastName",
+        type: "input",
+        message: "What the employee's last name?",
+      },
+      {
+        name: "roleID",
+        type: "list",
+        message: "Please select the role/position for this employee?",
+        choices: roleChoices,
+      },
+      {
+        name: "manager",
+        type: "confirm",
+        message: "Is this a manager or superviser position?",
+      },
+      {
+        name: "managerID",
+        type: "list",
+        message: "Please select the manager/superviser of this employee?",
+        choices: managerChoices,
+      },
+    ];
+    //const availableD = availableDepartments();
+    //const departChoices = availableD.map();
+
+    //function to provide departments as choices and reference it ID to the role
+
+    //send data to the
+    const answer = await inquirer.prompt(questions);
+    const res = await connection.query(
+      "INSERT INTO employee (first_name, last_name, role_id, isManager, superviserORmanager_id) VALUES (?,?,?,?,?)",
+      [
+        answer.firstName,
+        answer.lastName,
+        answer.roleID,
+        answer.manager,
+        answer.managerID,
+      ]
+    );
+    console.log(
+      `${answer.firstName} ${answer.lastName} was added as an employee. Next...`
+    );
+    interactWithDB();
+  }
 }
