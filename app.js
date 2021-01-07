@@ -6,7 +6,7 @@ const inquirer = require("inquirer");
 var connection = mysql.createConnection({
   host: "localhost",
 
-  // Your port; if not 3306
+  // Your port
   port: 3306,
 
   // Your username
@@ -122,10 +122,8 @@ function add() {
         choices: myChoices,
       },
     ];
-    //const availableD = availableDepartments();
-    //const departChoices = availableD.map();
 
-    //function to provide departments as choices and reference it ID to the role
+    //function to provide departments as choices
     function availableDepartments() {
       let sql = "SELECT * FROM department";
       connection.query(sql, async function (err, result) {
@@ -136,7 +134,7 @@ function add() {
         }
       });
     }
-    //send data to the
+    //send data
     inquirer.prompt(questions).then(function (answer) {
       connection.query(
         "INSERT INTO role (title, salary, department_id) VALUES (?,?,?)",
@@ -154,7 +152,7 @@ function add() {
   async function addEmployee() {
     const roleTitle = {};
     const managerId = {};
-    // cosnt myDepartments = await avaialbeDepartements()
+
     const roleChoices = await availableRole();
 
     const managerChoices = await availableManager();
@@ -189,7 +187,7 @@ function add() {
       },
     ];
 
-    //function to provide departments as choices and reference it ID to the role
+    //function to provide departments as choices
 
     //send data
     const answer = await inquirer.prompt(questions);
@@ -307,7 +305,7 @@ function view() {
         );
       });
   }
-  //function for viewing a total utilized badget of a department
+  //function for viewing a total utilized budget
   async function viewTheTotalUtilizedBudget() {
     let departmentChoices = [];
 
