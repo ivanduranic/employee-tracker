@@ -336,3 +336,91 @@ function view() {
       });
   }
 }
+
+//Defining function update
+function update() {
+  inquirer
+    .prompt({
+      name: "action",
+      type: "rawlist",
+      message: "Who would you like to update?",
+      choices: ["Employee's role", "Employee's manager"],
+    })
+    .then(function (answer) {
+      switch (answer.action) {
+        case "Employee's role":
+          updateEmployeesRole();
+          break;
+
+        case "Employee's manager":
+          updateEmployeesManager();
+          break;
+      }
+    });
+
+  async function updateEmployeesRole() {
+    let myChoices = [];
+    let myRoleChoices = [];
+
+    myRoleChoices = await availableRole();
+
+    Choices = await availableEmployees();
+
+    const answer = await inquirer.prompt([
+      {
+        name: "action",
+        type: "list",
+        message: "Which employee would you like to update",
+        choices: myChoices,
+      },
+      {
+        name: "newRole",
+        type: "list",
+        message: "What's the employee's new role",
+        choices: myRoleChoices,
+      },
+    ]);
+
+    connection.query(
+      "UPDATE employee SET role_id ='?' WHERE id='?'",
+      [answer.newRole, answer.action],
+      function (err, result) {
+        if (err) throw err;
+        console.log("updated! next...");
+        interactWithDB();
+      }
+    );
+  }
+  async function updateEmployeesManager() {
+    let Choices = [];
+    let myManagerChoices = [];
+
+    myManagerChoices = await availableManager();
+
+    Choices = await availableEmployees();
+
+    const answer = await inquirer.prompt([
+      {
+        name: "action",
+        type: "list",
+        message: "Which employee would you like to update",
+        choices: Choices,
+      },
+      {
+        name: "newManager",
+        type: "list",
+        message: "What's the employee's new manager",
+        choices: myManagerChoices,
+      },
+    ]);
+
+    connection.query(
+      "UPDATE employee SET superviserORmanager_id ='?' WHERE id='?'",
+      [answer.newManager, answer.action],
+      function (err, result) {
+        if (err) throw err;
+        console.log("updated! next...");
+      }
+    );
+  }
+}
